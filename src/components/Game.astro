@@ -22,8 +22,8 @@ const boards = [...Array(9).keys()];
     </nav>
   </header>
 
-  <main class="mt-6 grid gap-8 lg:mt-10 lg:grid-cols-[auto_1fr] lg:gap-12">
-    <section aria-label={t.board}>
+  <main class="game-layout mt-6 lg:mt-10">
+    <section class="[grid-area:board]" aria-label={t.board}>
       <div class="board" data-board role="group" aria-label={t.board}>
         {
           boards.map((board) => (
@@ -44,21 +44,29 @@ const boards = [...Array(9).keys()];
       </div>
     </section>
 
-    <section class="flex max-w-md flex-col gap-6">
-      <div>
-        <p class="text-status" data-status>{t.loading}</p>
-        <p class="mt-3 min-h-[3lh] text-muted" data-detail role="status">{t.intro}</p>
-        <button type="button" class="btn btn-secondary mt-2" data-reload hidden>{t.reload}</button>
-      </div>
 
-      <div class="flex flex-wrap gap-2">
-        <button type="button" class="btn btn-secondary" data-hint disabled>{t.hint}</button>
-        <label class="inline-flex min-h-11 cursor-pointer items-center gap-2 px-1">
-          <input type="checkbox" class="size-5 accent-current" data-show-thinking />
-          {t.showThinking}
-        </label>
+    <section class="max-w-md [grid-area:status]">
+      <p class="text-status" data-status>{t.loading}</p>
+      <div class="mt-3 min-h-[3lh] text-muted" role="status">
+        <p data-detail>{t.intro}</p>
+        <p class="mt-2 text-ink" data-hint-text hidden>
+          <strong>{t.hintLabel}</strong> <span data-hint-body></span>
+        </p>
       </div>
+      <button type="button" class="btn btn-secondary mt-2" data-reload hidden>{t.reload}</button>
+      <button type="button" class="btn btn-secondary mt-4" data-hint-button disabled>{t.hint}</button>
+    </section>
 
+    <section class="match [grid-area:match]">
+      <fieldset class="segmented">
+        <legend class="sr-only">{t.side}</legend>
+        <label><input type="radio" name="side" value="1" checked /><span>{t.sideX}</span></label>
+        <label><input type="radio" name="side" value="2" /><span>{t.sideO}</span></label>
+      </fieldset>
+      <button type="button" class="btn btn-primary w-full" data-new-game>{t.newGame}</button>
+    </section>
+
+    <section class="flex max-w-md flex-col gap-6 [grid-area:settings]">
       <fieldset>
         <legend class="mb-2 font-semibold">{t.level}</legend>
         <div class="choice">
@@ -73,17 +81,10 @@ const boards = [...Array(9).keys()];
         </div>
       </fieldset>
 
-      <fieldset>
-        <legend class="mb-2 font-semibold">{t.side}</legend>
-        <div class="choice">
-          <label><input type="radio" name="side" value="1" checked /><span>{t.sideX}</span></label>
-          <label><input type="radio" name="side" value="2" /><span>{t.sideO}</span></label>
-        </div>
-      </fieldset>
-
-      <div>
-        <button type="button" class="btn btn-primary" data-new-game>{t.newGame}</button>
-      </div>
+      <label class="inline-flex min-h-11 cursor-pointer items-center gap-2 self-start">
+        <input type="checkbox" class="size-5 accent-current" data-show-thinking />
+        {t.showThinking}
+      </label>
 
       <section data-thinking-panel hidden>
         <h2 class="font-semibold">{t.thinkingTitle}</h2>

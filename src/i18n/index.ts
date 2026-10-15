@@ -86,6 +86,7 @@ export interface Strings {
   playAnywhere: string;
   thinking: (iterations: number) => string;
   computerPlayed: (move: string) => string;
+  hintLabel: string;
   hintFor: (move: string, winRate: string) => string;
   won: string;
   lost: string;
@@ -133,7 +134,8 @@ export const STRINGS: Localized<Strings> = {
     playAnywhere: "Puedes jugar en cualquier tablero libre.",
     thinking: (n) => `La IA piensa: ${numberFormat("es").format(n)} simulaciones…`,
     computerPlayed: (move) => `La IA ha jugado en el ${move}.`,
-    hintFor: (move, rate) => `Pista: juega en el ${move} (${rate} de victorias).`,
+    hintLabel: "Pista:",
+    hintFor: (move, rate) => `juega en el ${move} (${rate} de victorias).`,
     won: "Has ganado",
     lost: "Ha ganado la IA",
     draw: "Tablas",
@@ -143,7 +145,7 @@ export const STRINGS: Localized<Strings> = {
     thinkingTitle: "Lo que piensa la IA",
     thinkingEmpty: "Aparecerá aquí después de la próxima jugada de la IA.",
     thinkingSummary: (n, s) =>
-      `En su última jugada simuló ${numberFormat("es").format(n)} partidas en ${s} s. Estas son las opciones que más exploró:`,
+      `En su última jugada simuló ${numberFormat("es").format(n)} partidas en ${s}\u00a0s. Estas son las opciones que más exploró:`,
     winRate: "Victorias",
     visits: "Simulaciones",
     cell: (move, state) => `${move}: ${state}`,
@@ -177,7 +179,8 @@ export const STRINGS: Localized<Strings> = {
     playAnywhere: "You can play in any open board.",
     thinking: (n) => `The computer is thinking: ${numberFormat("en").format(n)} simulations…`,
     computerPlayed: (move) => `The computer played in the ${move}.`,
-    hintFor: (move, rate) => `Hint: play in the ${move} (${rate} wins).`,
+    hintLabel: "Hint:",
+    hintFor: (move, rate) => `play in the ${move} (${rate} wins).`,
     won: "You won",
     lost: "The computer won",
     draw: "Draw",
@@ -187,7 +190,7 @@ export const STRINGS: Localized<Strings> = {
     thinkingTitle: "What the computer thinks",
     thinkingEmpty: "It shows here after the computer's next move.",
     thinkingSummary: (n, s) =>
-      `For its last move it simulated ${numberFormat("en").format(n)} games in ${s} s. These are the options it explored most:`,
+      `For its last move it simulated ${numberFormat("en").format(n)} games in ${s}\u00a0s. These are the options it explored most:`,
     winRate: "Wins",
     visits: "Simulations",
     cell: (move, state) => `${move}: ${state}`,

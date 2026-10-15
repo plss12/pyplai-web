@@ -3,7 +3,7 @@
  * worker (src/engine). Everything the player sees is drawn by render() from the state below.
  */
 import { CancelledError, Engine } from "@/engine/client";
-import { HINT_ITERATIONS, ITERATIONS, LEVELS, type Level } from "@/engine/levels";
+import { ITERATIONS, LEVELS, hintIterations, type Level } from "@/engine/levels";
 import type { Analysis } from "@/engine/protocol";
 import { DRAWN, activeBoards, legalMoves, newGame, play, type GameState, type Move, type Player } from "@/game/ultimate";
 import { LOCALES, STRINGS, describeBoard, describeMove, type Locale } from "@/i18n";
@@ -38,7 +38,9 @@ export function mountGame(root: HTMLElement): void {
   const statusElement = required<HTMLElement>(root, "[data-status]");
   const detailElement = required<HTMLElement>(root, "[data-detail]");
   const reloadButton = required<HTMLButtonElement>(root, "[data-reload]");
-  const hintButton = required<HTMLButtonElement>(root, "[data-hint]");
+  const hintButton = required<HTMLButtonElement>(root, "[data-hint-button]");
+  const hintText = required<HTMLElement>(root, "[data-hint-text]");
+  const hintBody = required<HTMLElement>(root, "[data-hint-body]");
   const showThinking = required<HTMLInputElement>(root, "[data-show-thinking]");
   const newGameButton = required<HTMLButtonElement>(root, "[data-new-game]");
   const thinkingPanel = required<HTMLElement>(root, "[data-thinking-panel]");
@@ -55,7 +57,12 @@ export function mountGame(root: HTMLElement): void {
   let level: Level = "medium";
   /** The computer's last analysis and the position it analysed. */
   let lastThought: { analysis: Analysis; before: GameState } | null = null;
-  let hint: { move: Move; value: number } | null = null;
+  /**
+   * The hint for the position after ``position`` moves. One per turn: different searches can
+   * suggest different moves, and asking again until one looks right would make the computer
+   * seem to contradict itself.
+   */
+  let hint: { move: Move; value: number; position: number } | null = null;
   let busy: "computer" | "hint" | null = null;
   /** What the status line says about the last thing that happened, besides whose turn it is. */
   let news: string | null = null;
@@ -97,18 +104,21 @@ export function mountGame(root: HTMLElement): void {
     }
   }
 
+  const hintGiven = (): boolean => hint !== null && hint.position === game.moves.length;
+
   async function askHint(): Promise<void> {
     if (!engine || engineStatus !== "ready" || busy || game.toMove !== human || game.outcome !== null) return;
+    if (hintGiven()) return;
     const current = generation;
     const position = game.moves.length;
     busy = "hint";
     render();
     try {
-      const analysis = await engine.analyse(game.moves, HINT_ITERATIONS);
+      const analysis = await engine.analyse(game.moves, hintIterations(level));
       // The player may have moved while the hint was being computed
       if (current !== generation || game.moves.length !== position) return;
       const best = analysis.moves[0];
-      if (best) hint = { move: best.move, value: best.value };
+      if (best) hint = { move: best.move, value: best.value, position };
     } catch (error) {
       if (error instanceof CancelledError || current !== generation) return;
       console.error("The hint failed", error);
@@ -151,23 +161,23 @@ export function mountGame(root: HTMLElement): void {
 
   // ------------------------------------------------------------------ drawing
 
-  function statusLine(): { title: string; detail: string } {
+  function statusLine(): { title: string; detail: string; hint: string | null } {
     const outcome = result(game, human);
-    if (outcome === "won") return { title: t.won, detail: news ?? "" };
-    if (outcome === "lost") return { title: t.lost, detail: news ?? "" };
-    if (outcome === "draw") return { title: t.draw, detail: news ?? "" };
-    if (failure) return { title: t.unavailable, detail: failure };
+    if (outcome === "won") return { title: t.won, detail: news ?? "", hint: null };
+    if (outcome === "lost") return { title: t.lost, detail: news ?? "", hint: null };
+    if (outcome === "draw") return { title: t.draw, detail: news ?? "", hint: null };
+    if (failure) return { title: t.unavailable, detail: failure, hint: null };
     if (game.toMove !== human) {
       const detail = engineStatus === "loading" ? t.loading : t.thinking(ITERATIONS[level]);
-      return { title: t.computerTurn, detail };
+      return { title: t.computerTurn, detail, hint: null };
     }
     const boards = activeBoards(game);
     const [only] = boards;
     const where = boards.size === 1 && only !== undefined ? t.playIn(describeBoard(locale, only)) : t.playAnywhere;
     const parts = [news, where];
-    if (hint) parts.push(t.hintFor(describeMove(locale, hint.move), percent.format(hint.value)));
     if (engineStatus === "loading") parts.push(t.loading);
-    return { title: t.yourTurn, detail: parts.filter(Boolean).join(" ") };
+    const hintLine = hintGiven() && hint ? t.hintFor(describeMove(locale, hint.move), percent.format(hint.value)) : null;
+    return { title: t.yourTurn, detail: parts.filter(Boolean).join(" "), hint: hintLine };
   }
 
   /** The computer's options to draw on the board: only right after it moved. */
@@ -191,7 +201,7 @@ export function mountGame(root: HTMLElement): void {
       setFlag(button, "mark", mark === 0 ? null : String(mark));
       setFlag(button, "playable", legal.has(move) ? "" : null);
       setFlag(button, "last", move === last ? "" : null);
-      setFlag(button, "hint", hint?.move === move ? "" : null);
+      setFlag(button, "hint", hintGiven() && hint?.move === move ? "" : null);
       button.setAttribute("aria-disabled", String(!legal.has(move)));
       button.tabIndex = move === focused ? 0 : -1;
       const state = mark !== 0 ? t.played(mark === 1 ? "X" : "O") : closed ? t.closed : t.empty;
@@ -220,11 +230,13 @@ export function mountGame(root: HTMLElement): void {
       setFlag(closedMark, "mark", owner === 1 || owner === 2 ? String(owner) : null);
     });
 
-    const { title, detail } = statusLine();
+    const { title, detail, hint: hintLine } = statusLine();
     statusElement.textContent = title;
     detailElement.textContent = detail;
+    hintText.hidden = hintLine === null;
+    hintBody.textContent = hintLine ?? "";
     reloadButton.hidden = engineStatus !== "failed";
-    hintButton.disabled = !humanTurn || engineStatus !== "ready" || busy !== null;
+    hintButton.disabled = !humanTurn || engineStatus !== "ready" || busy !== null || hintGiven();
     newGameButton.disabled = false;
 
     thinkingPanel.hidden = !showThinking.checked;

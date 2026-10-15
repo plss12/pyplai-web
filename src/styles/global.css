@@ -16,6 +16,9 @@
 
   --x: #2a78d6;
   --o: #d4561f;
+  /* The hint: the portfolio's third data series, distinct from X and O for colour-blind eyes */
+  --hint: #1baf7a;
+  --hint-fill: 30%;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -28,6 +31,8 @@
 
     --x: #5b9cf0;
     --o: #f0793f;
+    --hint: #2cc58d;
+    --hint-fill: 45%;
   }
 }
 
@@ -92,6 +97,47 @@
   }
 }
 
+/* ---------------------------------------------------------------- layout */
+
+/*
+ * Mobile: board, status, the match controls and settings, in that order (also the DOM and focus
+ * order). Desktop: the board with the match controls under it on the left, status and settings
+ * on the right. The board spans the first two rows and settings the last two; the last row is
+ * the flexible one, so a tall settings column grows down there instead of pushing the match
+ * controls away from the board.
+ */
+.game-layout {
+  --size: min(100vw - 2rem, 36rem);
+  display: grid;
+  gap: 2rem;
+  grid-template-areas: "board" "status" "match" "settings";
+}
+
+@media (width >= 64rem) {
+  .game-layout {
+    --size: min(100dvh - 12rem, 40rem);
+    column-gap: 3rem;
+    row-gap: 1.5rem;
+    align-items: start;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas: "board status" "board settings" "match settings";
+  }
+}
+
+/* The side and the new game button, as wide as the board */
+.match {
+  display: grid;
+  gap: 0.75rem;
+  width: var(--size);
+}
+
+@media (width >= 40rem) {
+  .match {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 /* ---------------------------------------------------------------- board */
 
 /*
@@ -99,18 +145,11 @@
  * boards and the thin ones inside them are what make the two levels of the game readable.
  */
 .board {
-  --size: min(100vw - 2rem, 36rem);
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: calc(var(--size) * 0.03);
   width: var(--size);
   aspect-ratio: 1;
-}
-
-@media (width >= 64rem) {
-  .board {
-    --size: min(100dvh - 8rem, 40rem);
-  }
 }
 
 .small-board {
@@ -230,11 +269,66 @@
 }
 
 .cell[data-hint] {
-  box-shadow: inset 0 0 0 3px var(--ink);
-  background: var(--surface);
+  z-index: 1;
+  background: color-mix(in srgb, var(--hint) var(--hint-fill), var(--bg));
+  box-shadow: inset 0 0 0 max(3px, calc(var(--size) * 0.008)) var(--hint);
+}
+
+/* One pulse when the hint appears, to draw the eye to it */
+@media (prefers-reduced-motion: no-preference) {
+  .cell[data-hint] {
+    animation: hint-pulse 700ms ease-out 2;
+  }
+}
+
+@keyframes hint-pulse {
+  50% {
+    scale: 1.12;
+    box-shadow:
+      inset 0 0 0 max(3px, calc(var(--size) * 0.008)) var(--hint),
+      0 0 0 6px color-mix(in srgb, var(--hint) 35%, transparent);
+  }
 }
 
 /* ---------------------------------------------------------------- controls */
+
+/* Two options sharing one pill: who starts the next game */
+.segmented {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+
+.segmented label {
+  display: grid;
+  place-items: center;
+  min-height: 2.5rem;
+  padding-inline: 0.75rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.segmented input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.segmented label:has(input:checked) {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.segmented label:has(input:focus-visible) {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
 
 .choice {
   display: flex;

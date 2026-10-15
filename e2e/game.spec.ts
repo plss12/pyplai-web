@@ -25,13 +25,23 @@ test("the board can be played with the keyboard", async ({ page }) => {
   await expect(page.locator('[data-move="48"]')).toHaveAttribute("data-mark", "1");
 });
 
-test("a hint highlights a legal move", async ({ page }) => {
+test("one hint per turn, shown apart and highlighted on the board", async ({ page }) => {
   await page.goto("./");
-  const hint = page.locator("[data-hint]");
+  const hint = page.locator("[data-hint-button]");
   await expect(hint).toBeEnabled({ timeout: 45_000 });
   await hint.click();
-  await expect(page.locator(".cell[data-hint]")).toHaveCount(1, { timeout: 45_000 });
-  await expect(page.locator("[data-detail]")).toContainText("Pista: juega en el tablero");
+  const hinted = page.locator(".cell[data-hint]");
+  await expect(hinted).toHaveCount(1, { timeout: 45_000 });
+  // Its own paragraph, with the label in bold
+  await expect(page.locator("[data-hint-text] strong")).toHaveText("Pista:");
+  await expect(page.locator("[data-hint-text]")).toContainText("juega en el tablero");
+  // No second hint in the same turn
+  await expect(hint).toBeDisabled();
+  // Playing the hint ends the turn; once the computer answers, a new hint is available
+  await hinted.click();
+  await expect(marks(page)).toHaveCount(2, { timeout: 45_000 });
+  await expect(page.locator("[data-hint-text]")).toBeHidden();
+  await expect(hint).toBeEnabled();
 });
 
 test("playing O lets the computer open the game", async ({ page }) => {

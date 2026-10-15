@@ -17,5 +17,9 @@ export const ITERATIONS: Readonly<Record<Level, number>> = {
   impossible: 6400,
 };
 
-/** The hint analyses the player's position as strongly as the hard level plays. */
-export const HINT_ITERATIONS = ITERATIONS.hard;
+/**
+ * Iterations for a hint: as strong as the computer the player faces, so the hint is "what the
+ * computer would play in your place" and never weaker than the opponent; but at least medium,
+ * because 25 iterations would suggest nearly random moves.
+ */
+export const hintIterations = (level: Level): number => Math.max(ITERATIONS[level], ITERATIONS.medium);

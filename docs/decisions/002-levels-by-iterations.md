@@ -18,7 +18,10 @@ iterations plays the same everywhere and can be calibrated.
 | Hard | 1,600 | 1,250 | +408 |
 | Impossible | 6,400 | 1,530 | +280 |
 
-The hint analyses the player's position with the hard level's 1,600 iterations.
+The hint analyses the player's position with the iterations of the level being played, and at
+least medium's 200: it is what the computer would play in the player's place, never weaker than
+the opponent and never nearly random (25 iterations would be). One hint per turn, because two
+searches can suggest different moves and asking again would make the computer look inconsistent.
 
 ## Calibration
 
