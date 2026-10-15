@@ -8,6 +8,7 @@ import type { Analysis } from "@/engine/protocol";
 import { DRAWN, activeBoards, legalMoves, newGame, play, type GameState, type Move, type Player } from "@/game/ultimate";
 import { LOCALES, STRINGS, describeBoard, describeMove, levelName, type Locale } from "@/i18n";
 import { loadChoice, saveChoice, type Choice, type StorageLike } from "./choice";
+import { createViewportDebug } from "./debug";
 import { byVisits, computerToMove, neighbour, result } from "./match";
 
 type EngineStatus = "loading" | "ready" | "failed";
@@ -64,6 +65,8 @@ export function mountGame(root: HTMLElement): void {
   const dialog = required<HTMLDialogElement>(root, "[data-new-game-dialog]");
   const cancelButton = required<HTMLButtonElement>(dialog, "[data-cancel]");
   const storage = browserStorage();
+  // TEMPORARY (see debug.ts): viewport measurements for the iPhone dialog bug
+  const debug = new URLSearchParams(location.search).has("debug") ? createViewportDebug(dialog) : null;
 
   // ------------------------------------------------------------------ state
 
@@ -108,6 +111,7 @@ export function mountGame(root: HTMLElement): void {
     cancelButton.hidden = !started;
     dialog.returnValue = "";
     dialog.showModal();
+    debug?.snapshot("dialog opened");
   }
 
   // ------------------------------------------------------------------ actions
