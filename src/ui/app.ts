@@ -108,6 +108,9 @@ export function mountGame(root: HTMLElement): void {
     cancelButton.hidden = !started;
     dialog.returnValue = "";
     dialog.showModal();
+    // Start focus on the dialog itself rather than its first radio, which would show a focus ring
+    // before the player has done anything; Tab still reaches the options, with their ring
+    dialog.focus();
   }
 
   // ------------------------------------------------------------------ actions

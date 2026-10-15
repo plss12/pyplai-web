@@ -89,7 +89,7 @@ const boards = [...Array(9).keys()];
     </section>
   </main>
 
-  <dialog class="new-game-dialog" data-new-game-dialog aria-labelledby="new-game-title">
+  <dialog class="new-game-dialog" data-new-game-dialog aria-labelledby="new-game-title" tabindex="-1">
     <form method="dialog" class="flex flex-col gap-6">
       <h2 id="new-game-title" class="text-2xl font-bold">{t.newGame}</h2>
       <!-- Radio groups instead of fieldset + legend: in this flex column Safari on iOS counted each

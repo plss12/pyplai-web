@@ -62,6 +62,11 @@ test("one hint per turn, shown apart and highlighted on the board", async ({ pag
 test("side and level are set in the dialog and fixed during the game", async ({ page }) => {
   await page.goto("./en/");
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  // Focus starts on the dialog, not on a radio (no focus ring before the player does anything),
+  // and Tab reaches the first option
+  await expect(dialog(page)).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(dialog(page).locator('input[name="side"][value="1"]')).toBeFocused();
   // Both choices are labelled radio groups for assistive technology
   await expect(dialog(page).getByRole("radiogroup", { name: "You play" })).toBeVisible();
   await expect(dialog(page).getByRole("radiogroup", { name: "Level" })).toBeVisible();
