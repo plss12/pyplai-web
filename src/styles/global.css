@@ -1,1 +1,308 @@
 @import "tailwindcss";
+
+/*
+ * Design tokens. A monochrome base, like the author's portfolio; colour belongs to the players:
+ * X and O use the portfolio's two colour-blind-safe data series, and their marks also differ
+ * in shape, so colour is never the only cue.
+ */
+:root {
+  color-scheme: light dark;
+
+  --bg: #ffffff;
+  --surface: #f2f2f2;
+  --ink: #000000;
+  --muted: #5e5e5e;
+  --line: #d4d4d4;
+
+  --x: #2a78d6;
+  --o: #d4561f;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #000000;
+    --surface: #161616;
+    --ink: #f5f5f5;
+    --muted: #a1a1a1;
+    --line: #333333;
+
+    --x: #5b9cf0;
+    --o: #f0793f;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-x: var(--x);
+  --color-o: var(--o);
+
+  --font-sans: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* The game status is the one loud line of type: condensed, heavy, large. */
+@utility text-status {
+  font-size: clamp(2.25rem, 7vw, 3.5rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  font-stretch: 75%;
+  text-wrap: balance;
+}
+
+@layer base {
+  html {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    font-size: 1.0625rem;
+    line-height: 1.55;
+    min-height: 100dvh;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  a {
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+
+  a,
+  button,
+  input,
+  select,
+  label {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* ---------------------------------------------------------------- board */
+
+/*
+ * Nine small boards in a 3x3 grid, each a 3x3 grid of buttons. The wide gaps between small
+ * boards and the thin ones inside them are what make the two levels of the game readable.
+ */
+.board {
+  --size: min(100vw - 2rem, 36rem);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: calc(var(--size) * 0.03);
+  width: var(--size);
+  aspect-ratio: 1;
+}
+
+@media (width >= 64rem) {
+  .board {
+    --size: min(100dvh - 8rem, 40rem);
+  }
+}
+
+.small-board {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  padding: 2px;
+  border-radius: 0.5rem;
+  background: var(--line);
+  transition: background-color 150ms ease;
+}
+
+/* Where the player to move may play */
+.small-board[data-active] {
+  background: var(--ink);
+}
+
+.cell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  border-radius: 0.3rem;
+  background: var(--bg);
+  color: var(--ink);
+  cursor: default;
+}
+
+.cell[data-playable] {
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .cell[data-playable]:hover {
+    background: var(--surface);
+  }
+}
+
+.cell:focus-visible {
+  z-index: 1;
+  outline-offset: -3px;
+}
+
+/* Marks: X is a cross, O a ring, drawn with borders so they scale with the cell */
+.cell[data-mark]::before,
+.cell[data-mark]::after,
+.closed-mark::before,
+.closed-mark::after {
+  content: "";
+  position: absolute;
+  inset: 22%;
+}
+
+.cell[data-mark="1"]::before,
+.cell[data-mark="1"]::after,
+.closed-mark[data-mark="1"]::before,
+.closed-mark[data-mark="1"]::after {
+  inset: 18% 46%;
+  border-radius: 999px;
+  background: var(--x);
+}
+
+.cell[data-mark="1"]::before,
+.closed-mark[data-mark="1"]::before {
+  rotate: 45deg;
+}
+
+.cell[data-mark="1"]::after,
+.closed-mark[data-mark="1"]::after {
+  rotate: -45deg;
+}
+
+.cell[data-mark="2"]::before,
+.closed-mark[data-mark="2"]::before {
+  border: max(2px, calc(var(--size) * 0.007)) solid var(--o);
+  border-radius: 50%;
+}
+
+/* The last move, so the player sees what the computer just did */
+.cell[data-last] {
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
+
+/* A closed small board: its cells fade and one large mark (or nothing, for a draw) covers it */
+.small-board[data-closed] .cell {
+  opacity: 0.25;
+}
+
+.closed-mark {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.closed-mark[data-mark="1"]::before,
+.closed-mark[data-mark="1"]::after {
+  inset: 8% 47%;
+}
+
+.closed-mark[data-mark="2"]::before {
+  inset: 10%;
+  border-width: max(4px, calc(var(--size) * 0.016));
+}
+
+/* What the computer thought: the more it simulated a move, the darker the cell */
+.cell[data-heat] {
+  background: color-mix(in srgb, var(--ink) calc(var(--heat) * 28%), var(--bg));
+}
+
+.heat-label {
+  position: absolute;
+  font-size: calc(var(--size) * 0.022);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+.cell[data-hint] {
+  box-shadow: inset 0 0 0 3px var(--ink);
+  background: var(--surface);
+}
+
+/* ---------------------------------------------------------------- controls */
+
+.choice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.choice label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding-inline: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.choice input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.choice input:checked + span {
+  color: var(--bg);
+}
+
+.choice label:has(input:checked) {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--bg);
+}
+
+.choice label:has(input:focus-visible) {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding-inline: 1.25rem;
+  border-radius: 999px;
+  font-weight: 600;
+  transition: opacity 150ms ease;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.btn-secondary {
+  border: 1px solid var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
+}

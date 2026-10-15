@@ -33,6 +33,10 @@ jobs:
       # prebuild copies Pyodide and bundles the Python engine into public/
       - run: npm run build
 
+      # The end-to-end tests play against the real build, with Pyodide in Chromium
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+
       - uses: actions/upload-pages-artifact@v5
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         with:

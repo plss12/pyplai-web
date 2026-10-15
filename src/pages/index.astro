@@ -1,56 +1,8 @@
 ---
-// Temporary page until the game interface exists: measures how fast pyplAI's MCTS runs on the
-// visitor's device, which sets how many iterations the hardest level can afford.
-import "../styles/global.css";
+import Game from "@/components/Game.astro";
+import Layout from "@/layouts/Layout.astro";
 ---
 
-<html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="robots" content="noindex" />
-    <title>pyplAI Web: prueba de velocidad</title>
-  </head>
-  <body class="mx-auto max-w-xl p-4 font-sans">
-    <h1 class="text-2xl font-bold">pyplAI Web</h1>
-    <p class="mt-2">
-      En construcción. Esta página mide la velocidad del MCTS de pyplAI en tu dispositivo.
-    </p>
-    <p id="status" class="mt-4 font-semibold" role="status">Cargando Pyodide y pyplAI…</p>
-    <pre id="out" class="mt-2 text-sm whitespace-pre-wrap"></pre>
-    <script>
-      import { Engine } from "../engine/client";
-
-      const status = document.getElementById("status")!;
-      const out = document.getElementById("out")!;
-      const line = (text: string) => (out.textContent += text + "\n");
-      const runs: [string, number[]][] = [
-        ["Apertura", []],
-        ["Apertura", []],
-        ["Apertura", []],
-        // 20 random legal moves (seed 7), checked with the Python rules
-        ["Medio juego", [41, 47, 24, 54, 1, 17, 73, 14, 45, 4, 36, 0, 6, 61, 64, 10, 9, 8, 79, 63]],
-      ];
-      const iterations = 1000;
-
-      try {
-        const engine = new Engine();
-        const load = await engine.ready;
-        line(`Carga: ${load.toFixed(1)} s`);
-        status.textContent = "Midiendo…";
-        for (const [label, moves] of runs) {
-          const t0 = performance.now();
-          await engine.analyse(moves, iterations, 1);
-          const seconds = (performance.now() - t0) / 1000;
-          line(`${label}: ${iterations} iteraciones en ${seconds.toFixed(2)} s (${Math.round(iterations / seconds)}/s)`);
-        }
-        line(navigator.userAgent);
-        status.textContent = "Terminado.";
-        out.dataset["done"] = "true";
-      } catch (error) {
-        console.error(error);
-        status.textContent = `Error: ${error instanceof Error ? error.message : String(error)}`;
-      }
-    </script>
-  </body>
-</html>
+<Layout locale="es">
+  <Game locale="es" />
+</Layout>
