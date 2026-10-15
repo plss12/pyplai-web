@@ -91,7 +91,8 @@ export interface Strings {
   thinking: (iterations: number) => string;
   computerPlayed: (move: string) => string;
   hintLabel: string;
-  hintFor: (move: string, winRate: string) => string;
+  /** The win rate goes with its sample size: early on, 4 of 4 simulations shows as 100%. */
+  hintFor: (move: string, winRate: string, simulations: number) => string;
   won: string;
   lost: string;
   draw: string;
@@ -143,7 +144,8 @@ export const STRINGS: Localized<Strings> = {
     thinking: (n) => `La IA piensa: ${numberFormat("es").format(n)} simulaciones…`,
     computerPlayed: (move) => `La IA ha jugado en el ${move}.`,
     hintLabel: "Pista:",
-    hintFor: (move, rate) => `juega en el ${move} (${rate} de victorias).`,
+    hintFor: (move, rate, n) =>
+      `juega en el ${move} (${rate} de victorias en ${numberFormat("es").format(n)} ${n === 1 ? "simulación" : "simulaciones"}).`,
     won: "Has ganado",
     lost: "Ha ganado la IA",
     draw: "Tablas",
@@ -192,7 +194,8 @@ export const STRINGS: Localized<Strings> = {
     thinking: (n) => `The computer is thinking: ${numberFormat("en").format(n)} simulations…`,
     computerPlayed: (move) => `The computer played in the ${move}.`,
     hintLabel: "Hint:",
-    hintFor: (move, rate) => `play in the ${move} (${rate} wins).`,
+    hintFor: (move, rate, n) =>
+      `play in the ${move} (${rate} wins in ${numberFormat("en").format(n)} ${n === 1 ? "simulation" : "simulations"}).`,
     won: "You won",
     lost: "The computer won",
     draw: "Draw",

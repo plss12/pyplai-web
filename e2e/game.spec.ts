@@ -48,6 +48,8 @@ test("one hint per turn, shown apart and highlighted on the board", async ({ pag
   // Its own paragraph, with the label in bold
   await expect(page.locator("[data-hint-text] strong")).toHaveText("Pista:");
   await expect(page.locator("[data-hint-text]")).toContainText("juega en el tablero");
+  // The win rate comes with the number of simulations behind it
+  await expect(page.locator("[data-hint-text]")).toContainText(/de victorias en \d+ simulaci/);
   // No second hint in the same turn
   await expect(hint).toBeDisabled();
   // Playing the hint ends the turn; once the computer answers, a new hint is available

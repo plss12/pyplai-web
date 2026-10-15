@@ -81,7 +81,7 @@ export function mountGame(root: HTMLElement): void {
    * suggest different moves, and asking again until one looks right would make the computer
    * seem to contradict itself.
    */
-  let hint: { move: Move; value: number; position: number } | null = null;
+  let hint: { move: Move; value: number; visits: number; position: number } | null = null;
   let busy: "computer" | "hint" | null = null;
   /** What the status line says about the last thing that happened, besides whose turn it is. */
   let news: string | null = null;
@@ -152,7 +152,7 @@ export function mountGame(root: HTMLElement): void {
       if (current !== generation || game.moves.length !== position) return;
       // The most explored move, not pyplAI's mean-reward pick (see byVisits)
       const [best] = byVisits(analysis.moves);
-      if (best) hint = { move: best.move, value: best.value, position };
+      if (best) hint = { move: best.move, value: best.value, visits: best.visits, position };
     } catch (error) {
       if (error instanceof CancelledError || current !== generation) return;
       console.error("The hint failed", error);
@@ -212,7 +212,7 @@ export function mountGame(root: HTMLElement): void {
     const where = boards.size === 1 && only !== undefined ? t.playIn(describeBoard(locale, only)) : t.playAnywhere;
     const parts = [news, where];
     if (engineStatus === "loading") parts.push(t.loading);
-    const hintLine = hintGiven() && hint ? t.hintFor(describeMove(locale, hint.move), percent.format(hint.value)) : null;
+    const hintLine = hintGiven() && hint ? t.hintFor(describeMove(locale, hint.move), percent.format(hint.value), hint.visits) : null;
     return { title: t.yourTurn, detail: parts.filter(Boolean).join(" "), hint: hintLine };
   }
 
