@@ -34,7 +34,8 @@ la arquitectura está en `docs/decisions/`.
   `uv run python scripts/make_parity_fixture.py` y comprobar que `npm test` sigue en verde;
   `tests/test_parity_fixture.py` falla si el fixture está desfasado.
 - Los niveles se miden en iteraciones de MCTS, nunca en tiempo (ADR 002). Sus valores salen de la
-  calibración; los de `levels.ts` son provisionales hasta que se ejecute.
+  calibración (`calibration/results.csv`): si cambian las reglas o pyplAI, repetirla
+  (`uv run python calibration/tournament.py`, ~8 h de CPU) antes de tocar `levels.ts`.
 - Todo lo que llega del worker se valida con los esquemas de `src/engine/protocol.ts`.
 - pyright en `strict` sin reglas desactivadas: lo que falte de pyplAI se añade al stub.
 - Rutas con la base `/pyplai-web/`: en el cliente, `import.meta.env.BASE_URL`.

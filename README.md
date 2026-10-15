@@ -7,8 +7,9 @@ Worker. No server is involved.
 
 **Play:** https://plss12.github.io/pyplai-web/
 
-> Work in progress: the game interface and the calibration of the difficulty levels are not
-> finished yet.
+Four levels, from 25 to 6,400 simulations per move, calibrated in a tournament of 1,080 games
+between search strengths ([how](docs/decisions/002-levels-by-iterations.md)). You can also ask
+for a hint or watch which moves the computer considered and how often each one won.
 
 ## How it works
 
