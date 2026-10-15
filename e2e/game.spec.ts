@@ -66,7 +66,7 @@ test("side and level are set in the dialog and fixed during the game", async ({ 
   // The computer plays X and opens the game
   await expect(marks(page)).toHaveCount(1, { timeout: 45_000 });
   await expect(page.locator("[data-status]")).toHaveText("Your turn");
-  await expect(page.locator("[data-current-game]")).toHaveText("Hard level, you play O");
+  await expect(page.locator("[data-current-game]")).toHaveText("Hard level, You play O");
   // Outside the dialog there is nothing to change them with
   await expect(page.locator('main input[name="level"], main input[name="side"]')).toHaveCount(0);
 });

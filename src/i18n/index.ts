@@ -69,6 +69,7 @@ export interface Strings {
   title: string;
   description: string;
   intro: string;
+  chooseToStart: string;
   board: string;
   move: string;
   level: string;
@@ -78,7 +79,6 @@ export interface Strings {
   newGame: string;
   start: string;
   cancel: string;
-  playingAs: string;
   currentLevel: (level: string) => string;
   hint: string;
   showThinking: string;
@@ -117,11 +117,12 @@ const numberFormat = (locale: Locale): Intl.NumberFormat => new Intl.NumberForma
 
 export const STRINGS: Localized<Strings> = {
   es: {
-    title: "Ultimate tic-tac-toe contra pyplAI",
+    title: "Ultimate tic-tac-toe contra el MCTS de pyplAI",
     description:
       "Juega al Ultimate tic-tac-toe contra la búsqueda de Monte Carlo de pyplAI, que se ejecuta en tu navegador.",
     intro:
-      "Juegas contra el MCTS de pyplAI, una librería de Python, que se ejecuta en tu navegador con Pyodide.",
+      "Tu rival es Monte Carlo Tree Search (MCTS), el algoritmo de búsqueda de pyplAI, una librería de Python que se ejecuta en tu navegador con Pyodide.",
+    chooseToStart: "Elige con qué juegas y el nivel para empezar.",
     board: "Tablero",
     move: "Jugada",
     level: "Nivel",
@@ -131,7 +132,6 @@ export const STRINGS: Localized<Strings> = {
     newGame: "Nueva partida",
     start: "Empezar",
     cancel: "Cancelar",
-    playingAs: "juegas con",
     currentLevel: (level) => `Nivel ${level}`,
     hint: "Pedir una pista",
     showThinking: "Ver lo que piensa la IA",
@@ -167,11 +167,12 @@ export const STRINGS: Localized<Strings> = {
     otherLanguage: "English",
   },
   en: {
-    title: "Ultimate tic-tac-toe against pyplAI",
+    title: "Ultimate tic-tac-toe against pyplAI's MCTS",
     description:
       "Play Ultimate tic-tac-toe against pyplAI's Monte Carlo tree search, running in your browser.",
     intro:
-      "You play against the MCTS of pyplAI, a Python library, running in your browser with Pyodide.",
+      "Your opponent is Monte Carlo tree search (MCTS), the search algorithm of pyplAI, a Python library running in your browser with Pyodide.",
+    chooseToStart: "Choose your side and the level to start.",
     board: "Board",
     move: "Move",
     level: "Level",
@@ -181,7 +182,6 @@ export const STRINGS: Localized<Strings> = {
     newGame: "New game",
     start: "Start",
     cancel: "Cancel",
-    playingAs: "you play",
     currentLevel: (level) => `${level} level`,
     hint: "Get a hint",
     showThinking: "Show what the computer thinks",

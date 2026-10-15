@@ -197,7 +197,7 @@ export function mountGame(root: HTMLElement): void {
   // ------------------------------------------------------------------ drawing
 
   function statusLine(): { title: string; detail: string; hint: string | null } {
-    if (!started) return { title: t.newGame, detail: t.intro, hint: null };
+    if (!started) return { title: t.newGame, detail: t.chooseToStart, hint: null };
     const outcome = result(game, human);
     if (outcome === "won") return { title: t.won, detail: news ?? "", hint: null };
     if (outcome === "lost") return { title: t.lost, detail: news ?? "", hint: null };
@@ -370,8 +370,10 @@ export function mountGame(root: HTMLElement): void {
     },
   );
   render();
-  // The engine keeps loading in the background while the player picks a side and a level
-  openNewGameDialog();
+  // The engine keeps loading in the background while the player picks a side and a level. The
+  // dialog waits for the web font: opened with the fallback font it took another size, and
+  // Safari on iOS only redrew it at the next tap.
+  void document.fonts.ready.then(openNewGameDialog);
 }
 
 function setFlag(element: HTMLElement, name: string, value: string | null): void {

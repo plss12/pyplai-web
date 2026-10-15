@@ -15,7 +15,10 @@ const boards = [...Array(9).keys()];
 
 <div class="mx-auto max-w-6xl px-4 py-6 lg:px-8 lg:py-10" data-game data-locale={locale}>
   <header class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-    <h1 class="text-xl font-bold">{t.title}</h1>
+    <div class="max-w-2xl">
+      <h1 class="text-xl font-bold">{t.title}</h1>
+      <p class="mt-1 text-muted">{t.intro}</p>
+    </div>
     <nav class="flex gap-4 text-muted">
       <a class="hover:text-ink" href="https://github.com/plss12/pyplai-web">{t.source}</a>
       <a class="hover:text-ink" href={otherPath} hreflang={locale === "es" ? "en" : "es"}>{t.otherLanguage}</a>
@@ -44,6 +47,15 @@ const boards = [...Array(9).keys()];
       </div>
     </section>
 
+    <section class="match [grid-area:match]">
+      <p class="current-game" data-current-game hidden>
+        <span class="font-semibold text-ink" data-current-level></span>
+        <!-- Two lines on screen; a comma keeps them apart for screen readers -->
+        <span class="sr-only">, </span>
+        <span>{t.side} <strong class="side-mark" data-current-side></strong></span>
+      </p>
+      <button type="button" class="btn btn-primary new-game" data-new-game>{t.newGame}</button>
+    </section>
 
     <section class="max-w-md [grid-area:status]">
       <p class="text-status" data-status>{t.loading}</p>
@@ -55,13 +67,6 @@ const boards = [...Array(9).keys()];
       </div>
       <button type="button" class="btn btn-secondary mt-2" data-reload hidden>{t.reload}</button>
       <button type="button" class="btn btn-secondary mt-4" data-hint-button disabled>{t.hint}</button>
-    </section>
-
-    <section class="match [grid-area:match]">
-      <p class="current-game" data-current-game hidden>
-        <span data-current-level></span>, {t.playingAs} <strong class="side-mark" data-current-side></strong>
-      </p>
-      <button type="button" class="btn btn-primary" data-new-game>{t.newGame}</button>
     </section>
 
     <section class="flex max-w-md flex-col gap-6 [grid-area:settings]">
