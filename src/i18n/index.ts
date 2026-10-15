@@ -68,7 +68,6 @@ export const levelName = (locale: Locale, level: Level): string => LEVEL_NAMES[l
 export interface Strings {
   title: string;
   description: string;
-  intro: string;
   chooseToStart: string;
   board: string;
   move: string;
@@ -120,8 +119,6 @@ export const STRINGS: Localized<Strings> = {
     title: "Ultimate tic-tac-toe contra el MCTS de pyplAI",
     description:
       "Juega al Ultimate tic-tac-toe contra la búsqueda de Monte Carlo de pyplAI, que se ejecuta en tu navegador.",
-    intro:
-      "Tu rival es Monte Carlo Tree Search (MCTS), el algoritmo de búsqueda de pyplAI, una librería de Python que se ejecuta en tu navegador con Pyodide.",
     chooseToStart: "Elige con qué juegas y el nivel para empezar.",
     board: "Tablero",
     move: "Jugada",
@@ -170,8 +167,6 @@ export const STRINGS: Localized<Strings> = {
     title: "Ultimate tic-tac-toe against pyplAI's MCTS",
     description:
       "Play Ultimate tic-tac-toe against pyplAI's Monte Carlo tree search, running in your browser.",
-    intro:
-      "Your opponent is Monte Carlo tree search (MCTS), the search algorithm of pyplAI, a Python library running in your browser with Pyodide.",
     chooseToStart: "Choose your side and the level to start.",
     board: "Board",
     move: "Move",
