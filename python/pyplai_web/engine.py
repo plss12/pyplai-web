@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from typing import TypedDict, TypeGuard, cast
+from typing import Literal, TypedDict, TypeGuard, cast
 
 import pyplAI
 
@@ -17,6 +17,16 @@ class MoveEvaluation(TypedDict):
     value: float
 
 
+# How the search picks its move once it ends (Browne et al. 2012, section 3.1): "mean" is the
+# max child, the child with the highest mean reward, as in their UCT pseudocode (Algorithm 2) and
+# pyplAI's default; "visits" is the robust child, the most visited one
+Selection = Literal["mean", "visits"]
+_PYPLAI_SELECTION: dict[Selection, Literal["media", "visitas"]] = {
+    "mean": "media",
+    "visits": "visitas",
+}
+
+
 class Analysis(TypedDict):
     best: int
     moves: list[MoveEvaluation]
@@ -24,7 +34,9 @@ class Analysis(TypedDict):
     seconds: float
 
 
-def analyse(moves: list[int], iterations: int, seed: int | None = None) -> Analysis:
+def analyse(
+    moves: list[int], iterations: int, seed: int | None = None, selection: Selection = "mean"
+) -> Analysis:
     """Rank the legal moves of the position reached by ``moves`` with pyplAI's MCTS.
 
     The search is bounded by iterations rather than time, so a difficulty level plays the same
@@ -34,6 +46,8 @@ def analyse(moves: list[int], iterations: int, seed: int | None = None) -> Analy
         moves: The moves played so far, from the start of the game.
         iterations: MCTS iterations to run (at least 1).
         seed: Seed for the search, to make it reproducible. None draws a fresh one.
+        selection: How the search picks its move and ranks the others: by mean reward
+            (``"mean"``) or by visits (``"visits"``).
 
     Returns:
         The chosen move and every legal move ranked best first, as pyplAI ranks them (mean
@@ -58,6 +72,7 @@ def analyse(moves: list[int], iterations: int, seed: int | None = None) -> Analy
         1.0,
         iteraciones=iterations,
         semilla=seed,
+        seleccion_final=_PYPLAI_SELECTION[selection],
     )
     result = search.analiza(state)
     return Analysis(

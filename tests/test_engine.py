@@ -16,6 +16,13 @@ def test_analysis_ranks_every_legal_move_and_runs_the_requested_iterations() -> 
     assert all(0 <= e["value"] <= 1 for e in result["moves"])
 
 
+def test_visits_selection_picks_and_ranks_by_visits() -> None:
+    result = analyse([], 300, seed=2, selection="visits")
+    visits = [e["visits"] for e in result["moves"]]
+    assert visits == sorted(visits, reverse=True)
+    assert result["best"] == result["moves"][0]["move"]
+
+
 def test_a_seed_makes_the_analysis_reproducible() -> None:
     assert analyse([], 150, seed=7)["moves"] == analyse([], 150, seed=7)["moves"]
 

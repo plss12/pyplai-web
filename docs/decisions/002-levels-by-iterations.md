@@ -37,6 +37,14 @@ simulations a move that won 2 of 2 tries tops the mean-reward ranking at 100%, w
 player reading it as a win rate. The computer's own move stays the max child that the levels were
 calibrated with.
 
+Whether the computer should play the robust child too was measured, not assumed:
+`tournament.py --selection-match` played each level's iterations by mean against the same by
+visits, 40 games per level with the same seeds (`calibration/selection.csv`). Choosing by visits
+scored 40% [26-55%] at 25 iterations, 55% [40-69%] at 200, 41% [27-57%] at 1,600 and 54%
+[39-68%] at 6,400: 76 of 160 points overall. Every interval holds 50%, so there is no evidence
+that either choice plays better, as expected when UCT already sends most visits to the moves
+with the best mean. The computer keeps pyplAI's default.
+
 ## Calibration
 
 `calibration/tournament.py` played 1,080 games (8.4 CPU hours) with the site's own engine code:

@@ -10,13 +10,15 @@ play at 0.
 Each MM sweep costs O(P) for P pairings, and the fit runs a fixed number of sweeps: O(sweeps * P)
 time and O(N + P) space for N players.
 
-    uv run python calibration/summary.py
+    uv run python calibration/summary.py                          # the level calibration
+    uv run python calibration/summary.py calibration/selection.csv  # mean against visits
 """
 
 from __future__ import annotations
 
 import csv
 import math
+import sys
 from collections import defaultdict
 from pathlib import Path
 
@@ -58,12 +60,17 @@ def bradley_terry(
     return {p: 400 * math.log10(s) for p, s in strength.items()}
 
 
-def order(player: str) -> int:
-    return -1 if player == "random" else int(player)
+def order(player: str) -> tuple[int, int]:
+    # random first, then by iterations; a "v" (by visits) player right after its "mean" twin
+    if player == "random":
+        return (-1, 0)
+    return (int(player.removesuffix("v")), int(player.endswith("v")))
 
 
 def main() -> None:
-    with RESULTS.open(encoding="utf-8", newline="") as f:
+    # An optional path summarises another tournament, such as selection.csv
+    path = Path(sys.argv[1]) if len(sys.argv) > 1 else RESULTS
+    with path.open(encoding="utf-8", newline="") as f:
         rows = list(csv.DictReader(f))
     tally: dict[tuple[str, str], list[int]] = defaultdict(lambda: [0, 0, 0])
     seconds: dict[tuple[str, str], list[float]] = defaultdict(list)
