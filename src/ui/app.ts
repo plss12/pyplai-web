@@ -8,7 +8,6 @@ import type { Analysis } from "@/engine/protocol";
 import { DRAWN, activeBoards, legalMoves, newGame, play, type GameState, type Move, type Player } from "@/game/ultimate";
 import { LOCALES, STRINGS, describeBoard, describeMove, levelName, type Locale } from "@/i18n";
 import { loadChoice, saveChoice, type Choice, type StorageLike } from "./choice";
-import { createViewportDebug } from "./debug";
 import { byVisits, computerToMove, neighbour, result } from "./match";
 
 type EngineStatus = "loading" | "ready" | "failed";
@@ -65,8 +64,6 @@ export function mountGame(root: HTMLElement): void {
   const dialog = required<HTMLDialogElement>(root, "[data-new-game-dialog]");
   const cancelButton = required<HTMLButtonElement>(dialog, "[data-cancel]");
   const storage = browserStorage();
-  // TEMPORARY (see debug.ts): viewport measurements for the iPhone dialog bug
-  const debug = new URLSearchParams(location.search).has("debug") ? createViewportDebug(dialog) : null;
 
   // ------------------------------------------------------------------ state
 
@@ -111,7 +108,6 @@ export function mountGame(root: HTMLElement): void {
     cancelButton.hidden = !started;
     dialog.returnValue = "";
     dialog.showModal();
-    debug?.snapshot("dialog opened");
   }
 
   // ------------------------------------------------------------------ actions
@@ -374,10 +370,8 @@ export function mountGame(root: HTMLElement): void {
     },
   );
   render();
-  // The engine keeps loading in the background while the player picks a side and a level. The
-  // dialog waits for the web font: opened with the fallback font it took another size, and
-  // Safari on iOS only redrew it at the next tap.
-  void document.fonts.ready.then(openNewGameDialog);
+  // The engine keeps loading in the background while the player picks a side and a level
+  openNewGameDialog();
 }
 
 function setFlag(element: HTMLElement, name: string, value: string | null): void {

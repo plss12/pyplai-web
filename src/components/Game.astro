@@ -92,15 +92,17 @@ const boards = [...Array(9).keys()];
   <dialog class="new-game-dialog" data-new-game-dialog aria-labelledby="new-game-title">
     <form method="dialog" class="flex flex-col gap-6">
       <h2 id="new-game-title" class="text-2xl font-bold">{t.newGame}</h2>
-      <fieldset>
-        <legend class="mb-2 font-semibold">{t.side}</legend>
+      <!-- Radio groups instead of fieldset + legend: in this flex column Safari on iOS counted each
+           legend's height twice until the next relayout, so the dialog opened too tall -->
+      <div role="radiogroup" aria-labelledby="new-game-side">
+        <p id="new-game-side" class="mb-2 font-semibold">{t.side}</p>
         <div class="segmented">
           <label><input type="radio" name="side" value="1" checked /><span>{t.sideX}</span></label>
           <label><input type="radio" name="side" value="2" /><span>{t.sideO}</span></label>
         </div>
-      </fieldset>
-      <fieldset>
-        <legend class="mb-2 font-semibold">{t.level}</legend>
+      </div>
+      <div role="radiogroup" aria-labelledby="new-game-level">
+        <p id="new-game-level" class="mb-2 font-semibold">{t.level}</p>
         <div class="choice levels">
           {
             LEVELS.map((level) => (
@@ -111,7 +113,7 @@ const boards = [...Array(9).keys()];
             ))
           }
         </div>
-      </fieldset>
+      </div>
       <div class="dialog-actions">
         <button type="submit" value="cancel" class="btn btn-secondary" data-cancel hidden>{t.cancel}</button>
         <button type="submit" value="start" class="btn btn-primary">{t.start}</button>
