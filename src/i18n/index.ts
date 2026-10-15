@@ -76,6 +76,10 @@ export interface Strings {
   sideX: string;
   sideO: string;
   newGame: string;
+  start: string;
+  cancel: string;
+  playingAs: string;
+  currentLevel: (level: string) => string;
   hint: string;
   showThinking: string;
   loading: string;
@@ -124,6 +128,10 @@ export const STRINGS: Localized<Strings> = {
     sideX: "X, empiezas tú",
     sideO: "O, empieza la IA",
     newGame: "Nueva partida",
+    start: "Empezar",
+    cancel: "Cancelar",
+    playingAs: "juegas con",
+    currentLevel: (level) => `Nivel ${level}`,
     hint: "Pedir una pista",
     showThinking: "Ver lo que piensa la IA",
     loading: "Cargando la IA en tu navegador…",
@@ -169,6 +177,10 @@ export const STRINGS: Localized<Strings> = {
     sideX: "X, you start",
     sideO: "O, the computer starts",
     newGame: "New game",
+    start: "Start",
+    cancel: "Cancel",
+    playingAs: "you play",
+    currentLevel: (level) => `${level} level`,
     hint: "Get a hint",
     showThinking: "Show what the computer thinks",
     loading: "Loading the computer in your browser…",

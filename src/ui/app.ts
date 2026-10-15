@@ -6,8 +6,9 @@ import { CancelledError, Engine } from "@/engine/client";
 import { ITERATIONS, LEVELS, hintIterations, type Level } from "@/engine/levels";
 import type { Analysis } from "@/engine/protocol";
 import { DRAWN, activeBoards, legalMoves, newGame, play, type GameState, type Move, type Player } from "@/game/ultimate";
-import { LOCALES, STRINGS, describeBoard, describeMove, type Locale } from "@/i18n";
-import { computerToMove, neighbour, result } from "./match";
+import { LOCALES, STRINGS, describeBoard, describeMove, levelName, type Locale } from "@/i18n";
+import { loadChoice, saveChoice, type Choice, type StorageLike } from "./choice";
+import { byVisits, computerToMove, neighbour, result } from "./match";
 
 type EngineStatus = "loading" | "ready" | "failed";
 
@@ -21,6 +22,16 @@ function required<T extends Element>(root: ParentNode, selector: string): T {
 }
 
 const errorText = (error: unknown): string => (error instanceof Error ? error.message : String(error));
+
+function browserStorage(): StorageLike | null {
+  try {
+    return window.localStorage;
+  } catch (error) {
+    // Some browsers throw on the mere access when site data is blocked
+    console.warn("Local storage is not available", error);
+    return null;
+  }
+}
 
 export function mountGame(root: HTMLElement): void {
   const locale: Locale = LOCALES.find((l) => l === root.dataset["locale"]) ?? "es";
@@ -47,11 +58,19 @@ export function mountGame(root: HTMLElement): void {
   const thinkingSummary = required<HTMLElement>(root, "[data-thinking-summary]");
   const thinkingTable = required<HTMLElement>(root, "[data-thinking-table]");
   const thinkingRows = required<HTMLElement>(root, "[data-thinking-rows]");
+  const currentGame = required<HTMLElement>(root, "[data-current-game]");
+  const currentLevel = required<HTMLElement>(root, "[data-current-level]");
+  const currentSide = required<HTMLElement>(root, "[data-current-side]");
+  const dialog = required<HTMLDialogElement>(root, "[data-new-game-dialog]");
+  const cancelButton = required<HTMLButtonElement>(dialog, "[data-cancel]");
+  const storage = browserStorage();
 
   // ------------------------------------------------------------------ state
 
   let engine: Engine | null = null;
   let engineStatus: EngineStatus = "loading";
+  /** False until the first game is chosen in the dialog: the board takes no moves before. */
+  let started = false;
   let game: GameState = newGame();
   let human: Player = 1;
   let level: Level = "medium";
@@ -71,16 +90,30 @@ export function mountGame(root: HTMLElement): void {
   // Bumped on every new game: answers that arrive for an older game are dropped
   let generation = 0;
 
-  const selectedLevel = (): Level =>
-    LEVELS.find((l) => l === root.querySelector<HTMLInputElement>('input[name="level"]:checked')?.value) ??
-    "medium";
-  const selectedSide = (): Player =>
-    root.querySelector<HTMLInputElement>('input[name="side"]:checked')?.value === "2" ? 2 : 1;
+  // Side and level only change through the new game dialog, never during a game
+  const dialogChoice = (): Choice => ({
+    side: dialog.querySelector<HTMLInputElement>('input[name="side"]:checked')?.value === "2" ? 2 : 1,
+    level: LEVELS.find((l) => l === dialog.querySelector<HTMLInputElement>('input[name="level"]:checked')?.value) ?? "medium",
+  });
+
+  function setDialogChoice(choice: Choice): void {
+    for (const input of dialog.querySelectorAll<HTMLInputElement>('input[type="radio"]')) {
+      input.checked = input.value === (input.name === "side" ? String(choice.side) : choice.level);
+    }
+  }
+
+  function openNewGameDialog(): void {
+    setDialogChoice(started ? { side: human, level } : loadChoice(storage));
+    // Before the first game there is nothing to go back to, so there is no cancelling
+    cancelButton.hidden = !started;
+    dialog.returnValue = "";
+    dialog.showModal();
+  }
 
   // ------------------------------------------------------------------ actions
 
   async function computerMove(): Promise<void> {
-    if (!engine || engineStatus !== "ready" || busy || !computerToMove(game, human)) return;
+    if (!started || !engine || engineStatus !== "ready" || busy || !computerToMove(game, human)) return;
     const current = generation;
     busy = "computer";
     hint = null;
@@ -117,7 +150,8 @@ export function mountGame(root: HTMLElement): void {
       const analysis = await engine.analyse(game.moves, hintIterations(level));
       // The player may have moved while the hint was being computed
       if (current !== generation || game.moves.length !== position) return;
-      const best = analysis.moves[0];
+      // The most explored move, not pyplAI's mean-reward pick (see byVisits)
+      const [best] = byVisits(analysis.moves);
       if (best) hint = { move: best.move, value: best.value, position };
     } catch (error) {
       if (error instanceof CancelledError || current !== generation) return;
@@ -132,7 +166,7 @@ export function mountGame(root: HTMLElement): void {
   }
 
   function humanMove(move: Move): void {
-    if (busy === "computer" || game.toMove !== human || !legalMoves(game).includes(move)) return;
+    if (!started || busy === "computer" || game.toMove !== human || !legalMoves(game).includes(move)) return;
     if (busy === "hint") {
       engine?.cancelPending();
       busy = null;
@@ -144,12 +178,13 @@ export function mountGame(root: HTMLElement): void {
     void computerMove();
   }
 
-  function startNewGame(): void {
+  function startNewGame(choice: Choice): void {
     generation += 1;
     engine?.cancelPending();
     busy = null;
-    human = selectedSide();
-    level = selectedLevel();
+    started = true;
+    human = choice.side;
+    level = choice.level;
     game = newGame();
     lastThought = null;
     hint = null;
@@ -162,6 +197,7 @@ export function mountGame(root: HTMLElement): void {
   // ------------------------------------------------------------------ drawing
 
   function statusLine(): { title: string; detail: string; hint: string | null } {
+    if (!started) return { title: t.newGame, detail: t.intro, hint: null };
     const outcome = result(game, human);
     if (outcome === "won") return { title: t.won, detail: news ?? "", hint: null };
     if (outcome === "lost") return { title: t.lost, detail: news ?? "", hint: null };
@@ -184,11 +220,11 @@ export function mountGame(root: HTMLElement): void {
   function heatMoves(): Analysis["moves"] {
     if (!showThinking.checked || !lastThought) return [];
     if (game.moves.length !== lastThought.before.moves.length + 1) return [];
-    return lastThought.analysis.moves.slice(0, TOP_MOVES);
+    return byVisits(lastThought.analysis.moves).slice(0, TOP_MOVES);
   }
 
   function render(): void {
-    const humanTurn = game.outcome === null && game.toMove === human && busy !== "computer";
+    const humanTurn = started && game.outcome === null && game.toMove === human && busy !== "computer";
     const legal = new Set(humanTurn ? legalMoves(game) : []);
     const active = humanTurn ? activeBoards(game) : new Set<number>();
     const heat = heatMoves();
@@ -237,7 +273,10 @@ export function mountGame(root: HTMLElement): void {
     hintBody.textContent = hintLine ?? "";
     reloadButton.hidden = engineStatus !== "failed";
     hintButton.disabled = !humanTurn || engineStatus !== "ready" || busy !== null || hintGiven();
-    newGameButton.disabled = false;
+    currentGame.hidden = !started;
+    currentLevel.textContent = t.currentLevel(levelName(locale, level));
+    currentSide.textContent = human === 1 ? "X" : "O";
+    currentSide.dataset["side"] = String(human);
 
     thinkingPanel.hidden = !showThinking.checked;
     renderThinkingPanel();
@@ -253,7 +292,7 @@ export function mountGame(root: HTMLElement): void {
     thinkingSummary.textContent = t.thinkingSummary(analysis.iterations, seconds.format(analysis.seconds));
     thinkingTable.hidden = false;
     thinkingRows.replaceChildren(
-      ...analysis.moves.slice(0, TOP_MOVES).map((e) => {
+      ...byVisits(analysis.moves).slice(0, TOP_MOVES).map((e) => {
         const row = document.createElement("tr");
         row.className = "border-t border-line";
         for (const [text, align] of [
@@ -296,19 +335,16 @@ export function mountGame(root: HTMLElement): void {
   });
 
   hintButton.addEventListener("click", () => void askHint());
-  newGameButton.addEventListener("click", startNewGame);
+  newGameButton.addEventListener("click", openNewGameDialog);
   showThinking.addEventListener("change", render);
   reloadButton.addEventListener("click", () => location.reload());
-  root.addEventListener("change", (event) => {
-    const input = event.target as HTMLInputElement;
-    if (input.name === "level") {
-      // Takes effect from the computer's next move
-      level = selectedLevel();
-      render();
-    } else if (input.name === "side" && game.moves.length <= 1) {
-      // Nothing worth keeping has been played yet: switch sides at once
-      startNewGame();
-    }
+  dialog.addEventListener("close", () => {
+    // "start" from the button; anything else (Escape, Cancel) keeps the game in progress, or
+    // starts the chosen one if there is none yet
+    if (dialog.returnValue !== "start" && started) return;
+    const choice = dialogChoice();
+    saveChoice(storage, choice);
+    startNewGame(choice);
   });
 
   // ------------------------------------------------------------------ start
@@ -334,6 +370,8 @@ export function mountGame(root: HTMLElement): void {
     },
   );
   render();
+  // The engine keeps loading in the background while the player picks a side and a level
+  openNewGameDialog();
 }
 
 function setFlag(element: HTMLElement, name: string, value: string | null): void {

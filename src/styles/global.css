@@ -125,17 +125,64 @@
   }
 }
 
-/* The side and the new game button, as wide as the board */
+/* The game in progress and the new game button, as wide as the board */
 .match {
-  display: grid;
-  gap: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
   width: var(--size);
 }
 
-@media (width >= 40rem) {
-  .match {
-    grid-template-columns: 1fr 1fr;
+.current-game {
+  color: var(--muted);
+}
+
+.side-mark {
+  font-weight: 700;
+}
+
+.side-mark[data-side="1"] {
+  color: var(--x);
+}
+
+.side-mark[data-side="2"] {
+  color: var(--o);
+}
+
+/* ---------------------------------------------------------------- new game dialog */
+
+.new-game-dialog {
+  width: min(100vw - 2rem, 30rem);
+  margin: auto;
+  padding: 1.5rem;
+  border-radius: 1.25rem;
+  background: var(--bg);
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+
+.new-game-dialog::backdrop {
+  background: color-mix(in srgb, #000 55%, transparent);
+}
+
+/* Four levels: two rows of two on a phone, one row when there is room. Doubled class: it
+   must beat .choice, which comes later and lays its options out as a wrapping row */
+.choice.levels {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media (width >= 30rem) {
+  .choice.levels {
+    grid-template-columns: repeat(4, auto);
+    justify-content: start;
   }
+}
+
+.choice.levels label {
+  justify-content: center;
 }
 
 /* ---------------------------------------------------------------- board */
@@ -306,7 +353,7 @@
   display: grid;
   place-items: center;
   min-height: 2.5rem;
-  padding-inline: 0.75rem;
+  padding-inline: 0.5rem;
   border-radius: 999px;
   cursor: pointer;
   font-weight: 600;

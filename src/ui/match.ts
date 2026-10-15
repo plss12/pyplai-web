@@ -51,3 +51,12 @@ export function neighbour(move: Move, key: string): Move | null {
   const clamp = (n: number): number => Math.min(8, Math.max(0, n));
   return moveAt(clamp(row + step[0]), clamp(col + step[1]));
 }
+
+/**
+ * The search's options, most visited first (ties: higher win rate first). This is the robust
+ * child order of Browne et al. (2012, section 3.1): with few simulations, a move that won 2 of
+ * 2 tries tops pyplAI's mean-reward ranking at 100%, though the search barely looked at it.
+ */
+export function byVisits<T extends { visits: number; value: number }>(moves: readonly T[]): T[] {
+  return [...moves].sort((a, b) => b.visits - a.visits || b.value - a.value);
+}

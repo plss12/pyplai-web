@@ -58,29 +58,13 @@ const boards = [...Array(9).keys()];
     </section>
 
     <section class="match [grid-area:match]">
-      <fieldset class="segmented">
-        <legend class="sr-only">{t.side}</legend>
-        <label><input type="radio" name="side" value="1" checked /><span>{t.sideX}</span></label>
-        <label><input type="radio" name="side" value="2" /><span>{t.sideO}</span></label>
-      </fieldset>
-      <button type="button" class="btn btn-primary w-full" data-new-game>{t.newGame}</button>
+      <p class="current-game" data-current-game hidden>
+        <span data-current-level></span>, {t.playingAs} <strong class="side-mark" data-current-side></strong>
+      </p>
+      <button type="button" class="btn btn-primary" data-new-game>{t.newGame}</button>
     </section>
 
     <section class="flex max-w-md flex-col gap-6 [grid-area:settings]">
-      <fieldset>
-        <legend class="mb-2 font-semibold">{t.level}</legend>
-        <div class="choice">
-          {
-            LEVELS.map((level) => (
-              <label>
-                <input type="radio" name="level" value={level} checked={level === "medium"} />
-                <span>{levelName(locale, level)}</span>
-              </label>
-            ))
-          }
-        </div>
-      </fieldset>
-
       <label class="inline-flex min-h-11 cursor-pointer items-center gap-2 self-start">
         <input type="checkbox" class="size-5 accent-current" data-show-thinking />
         {t.showThinking}
@@ -102,6 +86,36 @@ const boards = [...Array(9).keys()];
       </section>
     </section>
   </main>
+
+  <dialog class="new-game-dialog" data-new-game-dialog aria-labelledby="new-game-title">
+    <form method="dialog" class="flex flex-col gap-6">
+      <h2 id="new-game-title" class="text-2xl font-bold">{t.newGame}</h2>
+      <fieldset>
+        <legend class="mb-2 font-semibold">{t.side}</legend>
+        <div class="segmented">
+          <label><input type="radio" name="side" value="1" checked /><span>{t.sideX}</span></label>
+          <label><input type="radio" name="side" value="2" /><span>{t.sideO}</span></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend class="mb-2 font-semibold">{t.level}</legend>
+        <div class="choice levels">
+          {
+            LEVELS.map((level) => (
+              <label>
+                <input type="radio" name="level" value={level} checked={level === "medium"} />
+                <span>{levelName(locale, level)}</span>
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+      <div class="flex flex-wrap justify-end gap-2">
+        <button type="submit" value="cancel" class="btn btn-secondary" data-cancel hidden>{t.cancel}</button>
+        <button type="submit" value="start" class="btn btn-primary">{t.start}</button>
+      </div>
+    </form>
+  </dialog>
 </div>
 
 <script>

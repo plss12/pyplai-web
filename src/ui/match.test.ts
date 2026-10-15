@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { fromMoves, newGame } from "@/game/ultimate";
 import { describeMove } from "@/i18n";
-import { computerToMove, gridPosition, moveAt, neighbour, result } from "./match";
+import { byVisits, computerToMove, gridPosition, moveAt, neighbour, result } from "./match";
 
 describe("grid positions", () => {
   it("maps every move to a distinct cell of the 9x9 grid and back", () => {
@@ -64,5 +64,14 @@ describe("move descriptions", () => {
   it("name the board and the cell in both languages", () => {
     expect(describeMove("es", 4 * 9 + 2)).toBe("tablero central, casilla superior derecha");
     expect(describeMove("en", 4 * 9 + 2)).toBe("centre board, top right cell");
+  });
+});
+
+describe("options by visits", () => {
+  it("put a well-explored move above a lucky one", () => {
+    const lucky = { move: 1, visits: 2, value: 1 };
+    const explored = { move: 2, visits: 40, value: 0.6 };
+    const tied = { move: 3, visits: 40, value: 0.55 };
+    expect(byVisits([lucky, tied, explored]).map((m) => m.move)).toEqual([2, 3, 1]);
   });
 });

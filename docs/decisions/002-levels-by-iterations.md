@@ -23,6 +23,20 @@ least medium's 200: it is what the computer would play in the player's place, ne
 the opponent and never nearly random (25 iterations would be). One hint per turn, because two
 searches can suggest different moves and asking again would make the computer look inconsistent.
 
+## How a search picks its move
+
+Browne et al. (2012, section 3.1, after Schadd and Chaslot et al.) list four standard ways to
+pick the move once a search ends: the max child (highest mean reward), the robust child (most
+visited), the max-robust child (both, searching on until they agree) and the secure child
+(highest lower confidence bound). Their UCT pseudocode (Algorithm 2) returns the max child,
+`BESTCHILD(v0, 0)`, and so does pyplAI by default (`seleccion_final="media"`), which is what the
+calibration above measured.
+
+The hint and the "what the computer thinks" table use the robust child order instead: with few
+simulations a move that won 2 of 2 tries tops the mean-reward ranking at 100%, which misleads a
+player reading it as a win rate. The computer's own move stays the max child that the levels were
+calibrated with.
+
 ## Calibration
 
 `calibration/tournament.py` played 1,080 games (8.4 CPU hours) with the site's own engine code:
