@@ -1,43 +1,38 @@
-# Astro Starter Kit: Minimal
+# pyplAI Web
 
-```sh
-npm create astro@latest -- --template minimal
+Play Ultimate tic-tac-toe against the Monte Carlo tree search of
+[pyplAI](https://github.com/plss12/pyplAI), running in your browser: the computer is the real
+Python library, compiled to WebAssembly with [Pyodide](https://pyodide.org) and run in a Web
+Worker. No server is involved.
+
+**Play:** https://plss12.github.io/pyplai-web/
+
+> Work in progress: the game interface and the calibration of the difficulty levels are not
+> finished yet.
+
+## How it works
+
+- The board, legal moves and results are computed in TypeScript (`src/game/`), so the page
+  responds at once.
+- Each computer move replays the game in Python (`python/pyplai_web/`) and runs pyplAI's MCTS
+  with a fixed number of iterations per difficulty level, so a level plays the same on any device.
+- A fixture written by the Python rules checks that both implementations agree.
+
+The decisions behind this design are in [`docs/decisions/`](docs/decisions/).
+
+## Development
+
+Requires Node 22.12+ and [uv](https://docs.astral.sh/uv/).
+
+```bash
+npm ci && uv sync
+npm run dev          # copies Pyodide and bundles the Python engine first
+npm test             # TypeScript tests
+uv run pytest        # Python tests
+uv run ruff check . && uv run pyright
+npm run build
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## License
 
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
-
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
-
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+MIT. Built on [pyplAI](https://github.com/plss12/pyplAI), by the same author.

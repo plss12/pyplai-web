@@ -1,0 +1,49 @@
+[project]
+name = "pyplai-web"
+version = "0.1.0"
+description = "Python engine of pyplAI Web: Ultimate tic-tac-toe rules and pyplAI's MCTS, run in the browser with Pyodide."
+readme = "README.md"
+# Pyodide 314 runs Python 3.14, the only interpreter this code targets
+requires-python = ">=3.14"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Pedro Luis Soto Santos", email = "pepoluis712@gmail.com" }]
+dependencies = [
+    "pyplai",
+]
+
+[project.urls]
+Homepage = "https://plss12.github.io/pyplai-web/"
+Repository = "https://github.com/plss12/pyplai-web"
+
+[build-system]
+requires = ["uv_build>=0.13.1,<0.14"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-root = "python"
+
+[tool.uv.sources]
+pyplai = { git = "https://github.com/plss12/pyplAI", rev = "v1.1.0" }
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+src = ["python"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.pyright]
+typeCheckingMode = "strict"
+include = ["python", "tests", "calibration", "scripts"]
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.414",
+    "pytest>=9.1.1",
+    "ruff>=0.17.0",
+]

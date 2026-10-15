@@ -1,17 +1,49 @@
 {
   "name": "pyplai-web",
+  "version": "0.1.0",
+  "description": "Play Ultimate tic-tac-toe against pyplAI's Monte Carlo tree search, running in your browser with Pyodide.",
+  "author": {
+    "name": "Pedro Luis Soto Santos",
+    "email": "pepoluis712@gmail.com",
+    "url": "https://github.com/plss12"
+  },
+  "license": "MIT",
+  "homepage": "https://plss12.github.io/pyplai-web/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/plss12/pyplai-web.git"
+  },
+  "bugs": {
+    "url": "https://github.com/plss12/pyplai-web/issues"
+  },
   "type": "module",
-  "version": "0.0.1",
+  "private": true,
   "engines": {
     "node": ">=22.12.0"
   },
   "scripts": {
+    "assets": "node scripts/copy-pyodide.mjs && uv run python scripts/bundle_python.py",
+    "predev": "npm run assets",
     "dev": "astro dev",
-    "build": "astro build",
+    "prebuild": "npm run assets",
+    "build": "astro check && astro build",
     "preview": "astro preview",
+    "check": "astro check",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^7.3.8"
+    "@tailwindcss/vite": "^4.3.3",
+    "astro": "^7.3.8",
+    "pyodide": "314.0.7",
+    "tailwindcss": "^4.3.3",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@playwright/test": "^1.64.1",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.4"
   }
 }
