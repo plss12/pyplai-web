@@ -37,8 +37,10 @@ export const workerMessageSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("ready"), seconds: z.number().min(0) }),
   /** The Analysis as JSON, straight from Python: parsed and validated by the client. */
   z.object({ type: z.literal("result"), id: z.number().int(), analysis: z.string() }),
-  /** id is null when loading failed, otherwise the request that failed. */
-  z.object({ type: z.literal("error"), id: z.number().int().nullable(), message: z.string() }),
+  /** Pyodide or the Python engine could not load: no request can run. */
+  z.object({ type: z.literal("failed"), message: z.string() }),
+  /** One request failed. */
+  z.object({ type: z.literal("error"), id: z.number().int(), message: z.string() }),
 ]);
 
 export type WorkerMessage = z.infer<typeof workerMessageSchema>;

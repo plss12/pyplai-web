@@ -81,7 +81,7 @@ describe("Engine", () => {
   it("rejects ready and every waiting request when loading fails", async () => {
     const { worker, engine } = setup();
     const waiting = engine.analyse([], 50);
-    worker.reply({ type: "error", id: null, message: "HTTP 404" });
+    worker.reply({ type: "failed", message: "HTTP 404" });
     await expect(engine.ready).rejects.toThrow("could not load");
     await expect(waiting).rejects.toThrow("could not load");
   });

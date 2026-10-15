@@ -50,7 +50,7 @@ export class Engine {
         resolveReady(message.seconds);
         return;
       }
-      if (message.id === null) {
+      if (message.type === "failed") {
         const error = new Error(`The engine could not load: ${message.message}`);
         rejectReady(error);
         this.#rejectAll(error);

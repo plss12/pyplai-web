@@ -40,7 +40,7 @@ async function boot(): Promise<(request: string) => string> {
 const engine = boot();
 engine.catch((error: unknown) => {
   console.error("pyplAI engine failed to load", error);
-  post({ type: "error", id: null, message: describe(error) });
+  post({ type: "failed", message: describe(error) });
 });
 
 self.onmessage = async (event: MessageEvent<AnalyseRequest>) => {
