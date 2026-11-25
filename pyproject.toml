@@ -9,7 +9,7 @@ license = "MIT"
 license-files = ["LICENSE"]
 authors = [{ name = "Pedro Luis Soto Santos", email = "pepoluis712@gmail.com" }]
 dependencies = [
-    "pyplai",
+    "pyplai>=1.1,<2",
 ]
 
 [project.urls]
@@ -22,9 +22,6 @@ build-backend = "uv_build"
 
 [tool.uv.build-backend]
 module-root = "python"
-
-[tool.uv.sources]
-pyplai = { git = "https://github.com/plss12/pyplAI", rev = "v1.1.0" }
 
 [tool.ruff]
 line-length = 100
